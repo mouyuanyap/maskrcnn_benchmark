@@ -1,0 +1,6 @@
+[2021-02-01T06:58:26.321Z] info  code-server 3.8.0 c4610f7829701aadb045d450013b84491c30580d
+[2021-02-01T06:58:26.323Z] info  Using user-data-dir ~/.local/share/code-server
+[2021-02-01T06:58:26.349Z] info  Using config file ~/.config/code-server/config.yaml
+[2021-02-01T06:58:26.349Z] info  HTTP server listening on http://127.0.0.1:9000 
+[2021-02-01T06:58:26.350Z] info    - Authentication is disabled 
+[2021-02-01T06:58:26.350Z] info    - Not serving HTTPS 
