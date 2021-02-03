@@ -37,8 +37,8 @@ def build_transforms(cfg, is_train=True):
         [
             color_jitter,
             T.Resize(min_size, max_size),
-            T.RandomCrop((500,500)),
-            T.RandomRotateAug(True),
+            #T.RandomCrop((500,500)),
+            #T.RandomRotateAug(True),
             T.RandomHorizontalFlip(flip_horizontal_prob),
             T.RandomVerticalFlip(flip_vertical_prob),
             T.ToTensor(),
