@@ -1,3 +1,4 @@
+OUTPUT_DIR: "/content/drive/MyDrive/exp_hrsc"
 MODEL:
   META_ARCHITECTURE: "GeneralizedRCNN"
   WEIGHT: "/content/drive/MyDrive/R-101.pkl"
@@ -46,4 +47,5 @@ SOLVER:
   STEPS: (30000, 40000)
   MAX_ITER: 60000
   IMS_PER_BATCH: 1
+  CHECKPOINT_PERIOD: 5000
 
