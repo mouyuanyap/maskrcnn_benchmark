@@ -228,14 +228,7 @@ class FastRCNNLossComputation(object):
             reduction='sum',
             beta=1,
         )
-        if self.reduction in ['sum',]:
-            box_loss = box_loss / labels.numel()
-
-        if self.reduction == 'none':
-            num_props = classification_loss.size()[0]
-            box_loss_paste = torch.zeros((num_props,), device=device)
-            box_loss_paste[sampled_pos_inds_subset] = box_loss
-            box_loss = box_loss_paste
+        box_loss = box_loss / labels.numel()
 
         return classification_loss, box_loss
 '''
