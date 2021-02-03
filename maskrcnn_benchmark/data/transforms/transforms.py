@@ -6,6 +6,34 @@ import torchvision
 from torchvision.transforms import functional as F
 
 
+class RandomCrop(object):
+    def __init__(self, size):
+        self.size = size
+
+    @staticmethod
+    def get_params(img, output_size):
+        """Get parameters for ``crop`` for a random crop.
+        Args:
+            img (PIL Image): Image to be cropped.
+            output_size (tuple): Expected output size of the crop.
+        Returns:
+            tuple: params (i, j, h, w) to be passed to ``crop`` for random crop.
+        """
+        w, h = img.size
+        th, tw = output_size
+        if w == tw and h == th:
+            return 0, 0, h, w
+
+        i = random.randint(0, h - th)
+        j = random.randint(0, w - tw)
+        return i, j, th, tw
+
+    def __call__(self, image, target):
+        i, j, h, w = self.get_params(image, self.size)
+        image = F.crop(image, i, j ,h, w)
+        target = target.crop(i, j, h, w)
+        return image, target
+
 class Compose(object):
     def __init__(self, transforms):
         self.transforms = transforms
