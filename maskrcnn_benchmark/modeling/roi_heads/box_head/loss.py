@@ -208,13 +208,7 @@ class FastRCNNLossComputation(object):
             [proposal.get_field("regression_targets") for proposal in proposals], dim=0
         )
         
-        # https://pytorch.org/docs/stable/_modules/torch/nn/functional.html#cross_entropy
-        reduction = "mean" # default for 'F.cross_entropy'
-        if self.reduction == "none":
-            reduction = self.reduction
-        classification_loss = F.cross_entropy(
-            class_logits, labels, reduction=reduction
-        )
+        classification_loss = F.cross_entropy(class_logits, labels)
 
         # get indices that correspond to the regression targets for
         # the corresponding ground truth labels, to be used with
