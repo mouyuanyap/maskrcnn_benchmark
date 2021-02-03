@@ -194,6 +194,9 @@ _C.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 512
 # Target fraction of RoI minibatch that is labeled foreground (i.e. class > 0)
 _C.MODEL.ROI_HEADS.POSITIVE_FRACTION = 0.25
 
+# whether to use hard-mining
+_C.MODEL.ROI_HEADS.OHEM = True
+
 # Only used on test mode
 
 # Minimum score threshold (assuming scores in a [0, 1] range); a value chosen to
