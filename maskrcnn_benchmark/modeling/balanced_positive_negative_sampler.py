@@ -67,7 +67,7 @@ class BalancedPositiveNegativeSampler(object):
 
         return pos_idx, neg_idx
     
-    class OhemPositiveNegativeSampler(object):
+class OhemPositiveNegativeSampler(object):
     """
     This class samples batches, ensuring that they contain a fixed proportion of positives
     """
