@@ -55,12 +55,28 @@ class ROIBoxHead(torch.nn.Module):
         loss_classifier, loss_box_reg = self.loss_evaluator(
             [class_logits], [box_regression]
         )
+        print("loss_class")
+        print(loss_classifier.size()[0])
+        loss_classifier, loss_box_reg = ohem_for_bbox_loss(1000,loss_classifier,loss_box_reg)
+        
         return (
             x,
             proposals,
             dict(loss_classifier=loss_classifier, loss_box_reg=loss_box_reg),
         )
 
+def ohem_for_bbox_loss(ohem_batch_size, loss_classifier, loss_box_reg):
+    '''select the top-K highest-loss proposals'''
+    ohem_batch_size = min(
+        ohem_batch_size, loss_classifier.size()[0]
+    )
+    cls_box_loss = loss_classifier.detach() + loss_box_reg.detach()
+    ohem_idxs = torch.topk(cls_box_loss, ohem_batch_size)[1]
+    loss_classifier = loss_classifier[ohem_idxs]
+    loss_box_reg = loss_box_reg[ohem_idxs]
+    loss_classifier = loss_classifier.mean()
+    loss_box_reg = loss_box_reg.mean()
+    return loss_classifier, loss_box_reg
 
 def build_roi_box_head(cfg, in_channels):
     """
