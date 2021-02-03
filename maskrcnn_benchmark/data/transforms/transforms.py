@@ -5,6 +5,20 @@ import torch
 import torchvision
 from torchvision.transforms import functional as F
 
+class RandomRotateAug(object):
+    def __init__(self, random_rotate_on):
+        self.random_rotate_on = random_rotate_on
+
+    def __call__( self, image, target=None ):
+        if target is None:
+            return image
+        if not self.random_rotate_on:
+            return image, target
+        indx = int(random.random() * 100) // 25
+        image = F.rotate( image, 90 * indx, expand=True )
+        for _ in range(indx):
+            target = target.rotate90()
+        return image, target
 
 class RandomCrop(object):
     def __init__(self, size):
