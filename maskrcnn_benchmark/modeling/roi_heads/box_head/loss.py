@@ -142,7 +142,44 @@ class FastRCNNLossComputation(object):
         regression_targets = cat(
             [proposal.get_field("regression_targets") for proposal in proposals], dim=0
         )
+        
+        # https://pytorch.org/docs/stable/_modules/torch/nn/functional.html#cross_entropy
+        reduction = "mean" # default for 'F.cross_entropy'
+        if self.reduction == "none":
+            reduction = self.reduction
+        classification_loss = F.cross_entropy(
+            class_logits, labels, reduction=reduction
+        )
 
+        # get indices that correspond to the regression targets for
+        # the corresponding ground truth labels, to be used with
+        # advanced indexing
+        sampled_pos_inds_subset = torch.nonzero(labels > 0).squeeze(1)
+        labels_pos = labels[sampled_pos_inds_subset]
+        if self.cls_agnostic_bbox_reg:
+            map_inds = torch.tensor([4, 5, 6, 7], device=device)
+        else:
+            map_inds = 4 * labels_pos[:, None] + torch.tensor(
+                [0, 1, 2, 3], device=device)
+
+        reduction = self.reduction
+        box_loss = smooth_l1_loss(
+            box_regression[sampled_pos_inds_subset[:, None], map_inds],
+            regression_targets[sampled_pos_inds_subset],
+            reduction=reduction,
+            beta=1,
+        )
+        if self.reduction in ['sum',]:
+            box_loss = box_loss / labels.numel()
+
+        if self.reduction == 'none':
+            num_props = classification_loss.size()[0]
+            box_loss_paste = torch.zeros((num_props,), device=device)
+            box_loss_paste[sampled_pos_inds_subset] = box_loss
+            box_loss = box_loss_paste
+
+        return classification_loss, box_loss
+'''
         classification_loss = F.cross_entropy(class_logits, labels)
 
         # get indices that correspond to the regression targets for
@@ -165,7 +202,7 @@ class FastRCNNLossComputation(object):
         box_loss = box_loss / labels.numel()
 
         return classification_loss, box_loss
-
+'''
 
 def make_roi_box_loss_evaluator(cfg):
     matcher = Matcher(
