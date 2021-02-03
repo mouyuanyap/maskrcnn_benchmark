@@ -7,7 +7,7 @@ from maskrcnn_benchmark.modeling.box_coder import BoxCoder
 from maskrcnn_benchmark.modeling.matcher import Matcher
 from maskrcnn_benchmark.structures.boxlist_ops import boxlist_iou
 from maskrcnn_benchmark.modeling.balanced_positive_negative_sampler import (
-    BalancedPositiveNegativeSampler
+    BalancedPositiveNegativeSampler,
     OhemPositiveNegativeSampler
 )
 from maskrcnn_benchmark.modeling.utils import cat
