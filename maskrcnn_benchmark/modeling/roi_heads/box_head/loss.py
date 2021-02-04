@@ -23,6 +23,7 @@ class FastRCNNLossComputation(object):
         proposal_matcher,
         fg_bg_sampler,
         box_coder,
+        batch_size_per_image,
         cls_agnostic_bbox_reg=False
     ):
         """
@@ -34,6 +35,7 @@ class FastRCNNLossComputation(object):
         self.proposal_matcher = proposal_matcher
         self.fg_bg_sampler = fg_bg_sampler
         self.box_coder = box_coder
+        self.batch_size_per_image = batch_size_per_image
         self.cls_agnostic_bbox_reg = cls_agnostic_bbox_reg
 
     def match_targets_to_proposals(self, proposal, target):
@@ -146,12 +148,15 @@ class FastRCNNLossComputation(object):
             [proposal.get_field("regression_targets") for proposal in proposals], dim=0
         )
         
-        classification_loss = F.cross_entropy(class_logits, labels)
+        
+        classification_loss = F.cross_entropy(class_logits, labels, reduction='none')
+        #print(classification_loss.shape)
 
         # get indices that correspond to the regression targets for
         # the corresponding ground truth labels, to be used with
         # advanced indexing
         sampled_pos_inds_subset = torch.nonzero(labels > 0).squeeze(1)
+        
         labels_pos = labels[sampled_pos_inds_subset]
         if self.cls_agnostic_bbox_reg:
             map_inds = torch.tensor([4, 5, 6, 7], device=device)
@@ -163,10 +168,32 @@ class FastRCNNLossComputation(object):
         box_loss = smooth_l1_loss(
             box_regression[sampled_pos_inds_subset[:, None], map_inds],
             regression_targets[sampled_pos_inds_subset],
-            size_average=False,
+            reduction='none',
             beta=1,
         )
-        box_loss = box_loss / labels.numel()
+
+        #print(box_loss.shape)
+
+        loss = classification_loss[sampled_pos_inds_subset[:, None]] + box_loss
+        sorted_ohem_loss, idx = torch.sort(loss, descending=True)   
+
+        #print(sorted_ohem_loss.size()[0])
+        #print(idx)
+
+        if sorted_ohem_loss.size()[0] > self.batch_size_per_image:
+          keep_idx_cuda = idx[:keep_num]        # 保留到需要keep的数目
+          classification_loss = classification_loss[keep_idx_cuda]      
+          box_loss = box_loss[keep_idx_cuda]        # 分类和回归保留相同的数目
+
+        
+
+        classification_loss = classification_loss.mean()
+        box_loss = box_loss.sum() / labels.numel()    # 然后分别对分类和回归loss求均值
+
+        print(classification_loss)
+        print(box_loss)
+        #box_loss = box_loss / labels.numel()
+        
 
         return classification_loss, box_loss
 '''
@@ -214,6 +241,7 @@ def make_roi_box_loss_evaluator(cfg):
         matcher,
         fg_bg_sampler,
         box_coder,
+        cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE,
         cls_agnostic_bbox_reg
     )
 
