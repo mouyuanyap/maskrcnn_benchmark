@@ -190,8 +190,8 @@ class FastRCNNLossComputation(object):
         classification_loss = classification_loss.mean()
         box_loss = box_loss.sum() / labels.numel()    # 然后分别对分类和回归loss求均值
 
-        print(classification_loss)
-        print(box_loss)
+        #print(classification_loss)
+        #print(box_loss)
         #box_loss = box_loss / labels.numel()
         
 
