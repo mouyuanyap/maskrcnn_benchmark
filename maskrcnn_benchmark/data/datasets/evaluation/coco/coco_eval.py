@@ -70,6 +70,7 @@ def do_coco_evaluation(
 def prepare_for_coco_detection(predictions, dataset):
     # assert isinstance(dataset, COCODataset)
     coco_results = []
+    z = 0
     for image_id, prediction in enumerate(predictions):
         original_id = dataset.id_to_img_map[image_id]
         if len(prediction) == 0:
@@ -94,10 +95,14 @@ def prepare_for_coco_detection(predictions, dataset):
                     "category_id": mapped_labels[k],
                     "bbox": box,
                     "score": scores[k],
+                    "id": z+k+1,
+                    "segmentation":[],
                 }
                 for k, box in enumerate(boxes)
             ]
         )
+        for k, box in enumerate(boxes):
+          z=z+1
     return coco_results
 
 
